@@ -2,7 +2,7 @@ const ethers = require('ethers');
 const axios = require('axios');
 const fs = require('fs');
 
-var data = { positionsWithPaidInterest: '', sumOfPaidInterest: '' };
+var data = [];
 
 // Extract the data from the subgraph using axios
 const queryPositions = async () => {
@@ -36,6 +36,12 @@ const queryPositions = async () => {
     // Add the number of positions with paid interest to the object
     data.positionsWithPaidInterest = result.data.data.positions.length;
 
+    result.data.data.positions.forEach((item) => {
+      data.push({
+        accountId: item.account.id,
+        interestPaid: item.interestPaid,
+      });
+    });
     // Push the number of positions into the data object
     generateJsonFile(JSON.stringify(data));
   } catch (error) {
@@ -59,6 +65,7 @@ const returnSum = (queryData) => {
   queryData.forEach((item) => {
     // Round up all numbers
     tempArr.push(Math.trunc(item.interestPaid));
+    // tempArr.push(Number(item.interestPaid));
   });
 
   const initialValue = 0;
@@ -68,8 +75,12 @@ const returnSum = (queryData) => {
     (previousValue, currentValue) => previousValue + currentValue,
     initialValue
   );
+
   // Calculate final sum using BigNumber
   const finalSum = ethers.BigNumber.from(totalSum.toString());
+  // const finalSum = ethers.BigNumber.from(revised).mul(
+  //   BigNumber.from(10).pow(18)
+  // );
 
   // Log the result
   console.log(`Total sum of all interest paid - ${finalSum}`);

@@ -1,6 +1,6 @@
-const ethers = require('ethers');
-const axios = require('axios');
-const fs = require('fs');
+import ethers from 'ethers';
+import axios from 'axios';
+import fs from 'fs';
 
 var data = [];
 
@@ -63,7 +63,6 @@ const returnSum = (queryData) => {
   let tempArr = [];
   // Push all interestPaid values into array
   queryData.forEach((item) => {
-    // Round up all numbers
     tempArr.push(Math.trunc(item.interestPaid));
     // tempArr.push(Number(item.interestPaid));
   });

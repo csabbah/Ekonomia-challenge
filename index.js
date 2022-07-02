@@ -4,16 +4,63 @@ import fs from 'fs';
 
 var data = [];
 
+// ----------------------------------------------------- Axios client (First Attempt)
 // Extract the data from the subgraph using axios
-const queryPositions = async () => {
-  try {
-    const result = await axios.post(
-      'https://api.thegraph.com/subgraphs/name/nmimran99/compound',
+// const queryPositions = async () => {
+//   try {
+//     const result = await axios.post(
+//       'https://api.thegraph.com/subgraphs/name/nmimran99/compound',
+//       {
+//         // The below query returns 1000 positions that HAVE interestPaid
+//         // It is also sorted by interestPaid in descending order
+//         query: `
+//     {
+//   positions(first: 1000, where: { interestPaid_gt: "0" }, orderBy: interestPaid, orderDirection: desc ) {
+//     account {
+//       id
+//     }
+//     interestPaid
+//   }
+//   }
+//         `,
+//       }
+//     );
+//     console.log(result)
+//   } catch (error) {
+//     console.log(error);
+//   }
+// };
+
+// ----------------------------------------------------- GraphQL client (Second Attempt)
+// import { GraphQLClient, gql } from 'graphql-request';
+// const query = gql`
+//   {
+//   positions(first: 1000, where: { interestPaid_gt: "0" }, orderBy: interestPaid, orderDirection: desc ) {
+//     account {
+//       id
+//     }
+//     interestPaid
+//   }
+//   }
+// `;
+// const client = new GraphQLClient(
+//   'https://api.thegraph.com/subgraphs/name/nmimran99/compound'
+// );
+// const data2 = await client.request(query);
+
+// ----------------------------------------------------- Apollo client (Third Attempt)
+import pkg from '@apollo/client';
+const { ApolloClient, InMemoryCache, gql } = pkg;
+
+const client = new ApolloClient({
+  uri: 'https://api.thegraph.com/subgraphs/name/nmimran99/compound',
+  cache: new InMemoryCache(),
+});
+
+client
+  .query({
+    query: gql`
       {
-        // The below query returns 1000 positions that HAVE interestPaid
-        // It is also sorted by interestPaid in descending order
-        query: `
-    {
   positions(first: 1000, where: { interestPaid_gt: "0" }, orderBy: interestPaid, orderDirection: desc ) {
     account {
       id
@@ -21,22 +68,18 @@ const queryPositions = async () => {
     interestPaid
   }
   }
-        `,
-      }
-    );
-
+    `,
+  })
+  .then((result) => {
     // Console log the results
     console.log(
-      `Number of positions with interest paid - ${result.data.data.positions.length}`
+      `Number of positions with interest paid - ${result.data.positions.length}`
     );
 
     // Return the sum of all paid interests
-    returnSum(result.data.data.positions);
+    returnSum(result.data.positions);
 
-    // Add the number of positions with paid interest to the object
-    data.positionsWithPaidInterest = result.data.data.positions.length;
-
-    result.data.data.positions.forEach((item) => {
+    result.data.positions.forEach((item) => {
       data.push({
         accountId: item.account.id,
         interestPaid: item.interestPaid,
@@ -44,10 +87,7 @@ const queryPositions = async () => {
     });
     // Push the number of positions into the data object
     generateJsonFile(JSON.stringify(data));
-  } catch (error) {
-    console.log(error);
-  }
-};
+  });
 
 // Generates the positions.json file based on the data extracted from queryPositions()
 const generateJsonFile = (data) => {
@@ -63,8 +103,7 @@ const returnSum = (queryData) => {
   let tempArr = [];
   // Push all interestPaid values into array
   queryData.forEach((item) => {
-    tempArr.push(Math.trunc(item.interestPaid));
-    // tempArr.push(Number(item.interestPaid));
+    tempArr.push(Number(item.interestPaid));
   });
 
   const initialValue = 0;
@@ -76,16 +115,11 @@ const returnSum = (queryData) => {
   );
 
   // Calculate final sum using BigNumber
-  const finalSum = ethers.BigNumber.from(totalSum.toString());
-  // const finalSum = ethers.BigNumber.from(revised).mul(
-  //   BigNumber.from(10).pow(18)
+  // const finalSum = ethers.BigNumber.from(totalSum.toString());
+  // const finalSum = ethers.BigNumber.from(totalSum.toString()).mul(
+  //   ethers.BigNumber.from(10).pow(18)
   // );
 
   // Log the result
-  console.log(`Total sum of all interest paid - ${finalSum}`);
-
-  // Push the final value to the object
-  data.sumOfPaidInterest = finalSum;
+  console.log(`Total sum of all interest paid - ${totalSum}`);
 };
-
-queryPositions();

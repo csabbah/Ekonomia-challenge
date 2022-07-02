@@ -72,10 +72,10 @@ const returnSum = (queryData) => {
   const finalSum = ethers.BigNumber.from(totalSum.toString());
 
   // Log the result
-  console.log(`Total sum of all interest paid - ${Math.pow(finalSum, 18)}`);
+  console.log(`Total sum of all interest paid - ${finalSum}`);
 
   // Push the final value to the object
-  data.sumOfPaidInterest = Math.pow(finalSum, 18);
+  data.sumOfPaidInterest = finalSum;
 };
 
 queryPositions();

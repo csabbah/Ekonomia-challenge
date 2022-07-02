@@ -59,6 +59,7 @@ const client = new ApolloClient({
 
 client
   .query({
+    // Only return the positions that have interestPaid
     query: gql`
       {
   positions(first: 1000, where: { interestPaid_gt: "0" }, orderBy: interestPaid, orderDirection: desc ) {
@@ -79,13 +80,14 @@ client
     // Return the sum of all paid interests
     returnSum(result.data.positions);
 
+    // Iterate through all positions data and push it to the main data object declared above
     result.data.positions.forEach((item) => {
       data.push({
         accountId: item.account.id,
         interestPaid: item.interestPaid,
       });
     });
-    // Push the number of positions into the data object
+    // Stringify and generate the positions.json file with the extracted data
     generateJsonFile(JSON.stringify(data));
   });
 
@@ -99,22 +101,22 @@ const generateJsonFile = (data) => {
 
 // Return the sum of all interest paid
 const returnSum = (queryData) => {
-  // Create a temporary array
+  // Create a temporary array to hold just the interest paid values
   let tempArr = [];
-  // Push all interestPaid values into array
+  // Push all interestPaid values into above array
   queryData.forEach((item) => {
     tempArr.push(Number(item.interestPaid));
   });
 
+  // Declare variable to be used in reduce() and contain the total sum
   const initialValue = 0;
-
   // Reduce the array to one single sum number
   const totalSum = tempArr.reduce(
     (previousValue, currentValue) => previousValue + currentValue,
     initialValue
   );
 
-  // Calculate final sum using BigNumber
+  // Calculate final summation using BigNumber
   // const finalSum = ethers.BigNumber.from(totalSum.toString());
   // const finalSum = ethers.BigNumber.from(totalSum.toString()).mul(
   //   ethers.BigNumber.from(10).pow(18)

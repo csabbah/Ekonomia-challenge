@@ -27,8 +27,11 @@ const queryPositions = async () => {
 
     // Console log the results
     console.log(
-      `Number of positions with interest paid ${result.data.data.positions.length}`
+      `Number of positions with interest paid - ${result.data.data.positions.length}`
     );
+
+    // Return the sum of all paid interests
+    returnSum(result.data.data.positions);
 
     // Add the number of positions with paid interest to the object
     data.positionsWithPaidInterest = result.data.data.positions.length;
@@ -46,6 +49,33 @@ const generateJsonFile = (data) => {
     if (err) throw new Error(err);
     console.log('Positions.json file created!');
   });
+};
+
+// Return the sum of all interest paid
+const returnSum = (queryData) => {
+  // Create a temporary array
+  let tempArr = [];
+  // Push all interestPaid values into array
+  queryData.forEach((item) => {
+    // Round up all numbers
+    tempArr.push(Math.trunc(item.interestPaid));
+  });
+
+  const initialValue = 0;
+
+  // Reduce the array to one single sum number
+  const totalSum = tempArr.reduce(
+    (previousValue, currentValue) => previousValue + currentValue,
+    initialValue
+  );
+  // Calculate final sum using BigNumber
+  const finalSum = ethers.BigNumber.from(totalSum.toString());
+
+  // Log the result
+  console.log(`Total sum of all interest paid - ${Math.pow(finalSum, 18)}`);
+
+  // Push the final value to the object
+  data.sumOfPaidInterest = Math.pow(finalSum, 18);
 };
 
 queryPositions();

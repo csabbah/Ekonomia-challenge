@@ -51,9 +51,11 @@ var data = [];
 // ----------------------------------------------------- Apollo client (Third Attempt)
 import pkg from '@apollo/client';
 const { ApolloClient, InMemoryCache, gql } = pkg;
+import fetch from 'cross-fetch';
 
 const client = new ApolloClient({
   uri: 'https://api.thegraph.com/subgraphs/name/nmimran99/compound',
+  fetch,
   cache: new InMemoryCache(),
 });
 

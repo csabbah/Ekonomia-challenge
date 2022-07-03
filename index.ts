@@ -10,7 +10,7 @@ var allData: Array<any> = [];
 const generateJsonFile = (data: string) => {
   fs.writeFile('./positions.json', data, (err) => {
     if (err) return console.log(err);
-    console.log('Positions.json file created!');
+    console.log('Positions.json file created!\n');
   });
 };
 
@@ -84,7 +84,8 @@ const fetchQuery = async () => {
   while (keepQuerying) {
     if (skip == 6000) {
       keepQuerying = false;
-      console.log('done', allData);
+      console.log(`\n`);
+
       break;
     }
 

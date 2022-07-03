@@ -3,7 +3,7 @@
 import * as fs from 'fs';
 
 var data: Array<any> = [];
-
+var allData: Array<any> = [];
 // ----------------------------------------------------- Side Functions
 
 // Generates the positions.json file based on the data extracted from queryPositions()
@@ -72,46 +72,72 @@ const returnSum = (queryData: Array<any>) => {
 
 // ----------------------------------------------------- GraphQL client (Second Attempt)
 import { GraphQLClient, gql } from 'graphql-request';
-const query = gql`
-  {
-    positions(
-      first: 1000
-      where: { interestPaid_gt: "0" }
-      orderBy: interestPaid
-      orderDirection: desc
-    ) {
-      account {
-        id
-      }
-      interestPaid
-    }
-  }
-`;
-const client = new GraphQLClient(
-  'https://api.thegraph.com/subgraphs/name/nmimran99/compound'
-);
+import { resourceLimits } from 'worker_threads';
 
-const returnResult = async () => {
-  const result = await client.request(query);
-  console.log(
-    `Number of positions with interest paid - ${result.positions.length}`
-  );
+// Fetch the data from the subgraph
+const fetchQuery = async () => {
+  let skip: number = 0;
+  const limit: number = 1000;
+
+  let keepQuerying: boolean = true;
+
+  while (keepQuerying) {
+    if (skip == 6000) {
+      keepQuerying = false;
+      console.log('done', allData);
+      break;
+    }
+
+    console.log(`Current skip ${skip}`);
+
+    const query = gql`
+      {
+        positions(
+          first: ${limit},
+          skip: ${skip},
+          where: { interestPaid_gt: "0" }
+          orderBy: interestPaid
+          orderDirection: desc
+        ) {
+          account {
+            id
+          }
+          interestPaid
+        }
+      }
+    `;
+    const client = new GraphQLClient(
+      'https://api.thegraph.com/subgraphs/name/nmimran99/compound'
+    );
+
+    const result = await client.request(query);
+    result.positions.forEach((item: object) => {
+      allData.push(item);
+    });
+
+    skip += limit;
+  }
+  console.log(`Number of positions with interest paid - ${allData.length}`);
 
   // Return the sum of all paid interests
-  returnSum(result.positions);
+  returnSum(allData);
 
   // Iterate through all positions data and push it to the main data object declared above
-  result.positions.forEach((item: any) => {
+  allData.forEach((item: any) => {
     data.push({
       accountId: item.account.id,
       interestPaid: item.interestPaid,
     });
   });
+
+  console.log(
+    `Number of Positions pushed to 'positions.json': ${allData.length}`
+  );
   // Stringify and generate the positions.json file with the extracted data
   generateJsonFile(JSON.stringify(data));
 };
 
-returnResult();
+fetchQuery();
 
 // ----------------------------------------------------- Apollo client (Third Attempt)
 // import pkg from '@apollo/client';

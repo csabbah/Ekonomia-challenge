@@ -40,8 +40,8 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
     }
 };
 exports.__esModule = true;
-// import ethers from 'ethers';
 // import axios from 'axios';
+var ethers = require("ethers");
 var fs = require("fs");
 var data = [];
 var allData = [];
@@ -51,7 +51,7 @@ var generateJsonFile = function (data) {
     fs.writeFile('./positions.json', data, function (err) {
         if (err)
             return console.log(err);
-        console.log('Positions.json file created!\n');
+        console.log('Positions.json file created!');
     });
 };
 // Return the sum of all interest paid
@@ -66,13 +66,11 @@ var returnSum = function (queryData) {
     var initialValue = 0;
     // Reduce the array to one single sum number
     var totalSum = tempArr.reduce(function (previousValue, currentValue) { return previousValue + currentValue; }, initialValue);
-    // Calculate final summation using BigNumber
-    // const finalSum = ethers.BigNumber.from(totalSum.toString());
-    // const finalSum = ethers.BigNumber.from(totalSum.toString()).mul(
-    //   ethers.BigNumber.from(10).pow(18)
-    // );
     // Log the result
     console.log("Total sum of all interest paid - ".concat(totalSum));
+    // Calculate final summation using BigNumber
+    var finalSum = ethers.BigNumber.from(Math.trunc(totalSum).toString());
+    console.log("BigNumber hex: ".concat(finalSum));
 };
 // ----------------------------------------------------- Main Fetch Functions
 // ----------------------------------------------------- Axios client (First Attempt)
@@ -117,7 +115,6 @@ var fetchQuery = function () { return __awaiter(void 0, void 0, void 0, function
                 if (!keepQuerying) return [3 /*break*/, 3];
                 if (skip == 6000) {
                     keepQuerying = false;
-                    console.log("\n");
                     return [3 /*break*/, 3];
                 }
                 console.log("Current skip ".concat(skip));
@@ -142,7 +139,6 @@ var fetchQuery = function () { return __awaiter(void 0, void 0, void 0, function
                         interestPaid: item.interestPaid
                     });
                 });
-                console.log("Number of Positions pushed to 'positions.json': ".concat(allData.length));
                 // Stringify and generate the positions.json file with the extracted data
                 generateJsonFile(JSON.stringify(data));
                 return [2 /*return*/];

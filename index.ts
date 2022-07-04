@@ -1,5 +1,5 @@
-// import ethers from 'ethers';
 // import axios from 'axios';
+import * as ethers from 'ethers';
 import * as fs from 'fs';
 
 var data: Array<any> = [];
@@ -30,15 +30,12 @@ const returnSum = (queryData: Array<any>) => {
     (previousValue, currentValue) => previousValue + currentValue,
     initialValue
   );
-
-  // Calculate final summation using BigNumber
-  // const finalSum = ethers.BigNumber.from(totalSum.toString());
-  // const finalSum = ethers.BigNumber.from(totalSum.toString()).mul(
-  //   ethers.BigNumber.from(10).pow(18)
-  // );
-
   // Log the result
   console.log(`Total sum of all interest paid - ${totalSum}`);
+
+  // Calculate final summation using BigNumber
+  const finalSum = ethers.BigNumber.from(Math.trunc(totalSum).toString());
+  console.log(`BigNumber hex: ${finalSum}`);
 };
 
 // ----------------------------------------------------- Main Fetch Functions
@@ -72,7 +69,6 @@ const returnSum = (queryData: Array<any>) => {
 
 // ----------------------------------------------------- GraphQL client (Second Attempt)
 import { GraphQLClient, gql } from 'graphql-request';
-import { resourceLimits } from 'worker_threads';
 
 // Fetch the data from the subgraph
 const fetchQuery = async () => {
@@ -84,7 +80,6 @@ const fetchQuery = async () => {
   while (keepQuerying) {
     if (skip == 6000) {
       keepQuerying = false;
-      console.log('done', allData);
       break;
     }
 
@@ -130,9 +125,6 @@ const fetchQuery = async () => {
     });
   });
 
-  console.log(
-    `Number of Positions pushed to 'positions.json': ${allData.length}`
-  );
   // Stringify and generate the positions.json file with the extracted data
   generateJsonFile(JSON.stringify(data));
 };

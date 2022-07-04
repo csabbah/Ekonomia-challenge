@@ -35,7 +35,7 @@ const returnSum = (queryData: Array<any>) => {
 
   // Calculate final summation using BigNumber
   const finalSum = ethers.BigNumber.from(Math.trunc(totalSum).toString());
-  console.log(`BigNumber hex: ${finalSum}`);
+  console.log(`BigNumber: ${finalSum}`);
 };
 
 // ----------------------------------------------------- Main Fetch Functions

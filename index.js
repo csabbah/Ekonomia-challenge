@@ -70,7 +70,7 @@ var returnSum = function (queryData) {
     console.log("Total sum of all interest paid - ".concat(totalSum));
     // Calculate final summation using BigNumber
     var finalSum = ethers.BigNumber.from(Math.trunc(totalSum).toString());
-    console.log("BigNumber hex: ".concat(finalSum));
+    console.log("BigNumber: ".concat(finalSum));
 };
 // ----------------------------------------------------- Main Fetch Functions
 // ----------------------------------------------------- Axios client (First Attempt)
